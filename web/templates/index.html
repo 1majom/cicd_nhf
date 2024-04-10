@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image</title>
+</head>
+<body>
+    <h1>Upload Image</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required><br>
+        <textarea name="text" placeholder="Enter text..." required></textarea><br>
+        <button type="submit">Upload</button>
+    </form>
+    
+    <h2>Uploaded Images</h2>
+    {% for upload in uploads %}
+    <div>
+        <p>Order Number: {{ upload.order_number }}</p>
+        <p>Text: {{ upload.text }}</p>
+        <p>Original Image:</p>
+        <img src="{{ upload.original_image_path }}" alt="Original Image" style="max-width: 400px;"><br>
+        <p>Modified Image:</p>
+        <img src="{{ upload.modified_image_path }}" alt="Modified Image" style="max-width: 400px;"><br>
+    </div>
+    {% endfor %}
+</body>
+</html>
