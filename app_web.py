@@ -3,7 +3,8 @@ This module has the main application basically. It has three connections to othe
 One to the rabbitMQ for notifying the admins on the /admin endpoint. And another to the Azure
 Compute Vision which makes the car detection and by this it gives back the locations of the cars
 from which we can draw the rectangles and get the number of cars. The last connection is to the
-mariadb which is used to store the number of the cars and also the path on which the images can be reached.
+mariadb which is used to store the number of the cars and also the path on which the images can
+be reached.
 """
 
 import os
@@ -25,6 +26,7 @@ db = SQLAlchemy(app)
 RABBITMQ_HOST = 'rabbitmq'
 RABBITMQ_PORT = 15674  # Web STOMP port
 QUEUE_NAME = '/queue/car_numbers'
+
 
 class Upload(db.Model):
     """
