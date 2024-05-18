@@ -24,7 +24,7 @@
             client.connect('guest', 'guest', function(frame) {
                 client.subscribe('/queue/car_numbers', function(message) {
                     var num_cars = JSON.parse(message.body).num_cars;
-                    var num_cars = JSON.parse(message.body).text;
+                    var text = JSON.parse(message.body).text;
                     var timestamp = new Date().toLocaleString();
 
                     var row = document.createElement('tr');
