@@ -50,3 +50,6 @@ volumes:
   rabbitmq_data:
   uploads_volume:
   processed_images_volume:
+
+networks:
+  mynet:
