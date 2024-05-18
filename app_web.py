@@ -18,12 +18,12 @@ from azure.cognitiveservices.vision.computervision.models import VisualFeatureTy
 from msrest.authentication import CognitiveServicesCredentials
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@mariadb/database'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@cicdhf-mariadb-1/database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # RabbitMQ STOMP configuration
-RABBITMQ_HOST = 'rabbitmq'
+RABBITMQ_HOST = 'cicdhf-rabbitmq-1'
 RABBITMQ_PORT = 15674  # Web STOMP port
 QUEUE_NAME = '/queue/car_numbers'
 
