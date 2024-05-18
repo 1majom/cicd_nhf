@@ -1,0 +1,9 @@
+flask
+flask_sqlalchemy
+azure-cognitiveservices-vision-computervision
+msrest
+opencv-python
+requests
+pika
+stomp.py
+pymysql

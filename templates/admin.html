@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RabbitMQ Car Numbers</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h1>Car Numbers</h1>
+    <button id="start">Start Connection</button>
+    <table id="messages">
+        <tr>
+            <th>Timestamp</th>
+            <th>Number of Cars</th>
+        </tr>
+    </table>
+
+    <script>
+        document.getElementById('start').addEventListener('click', function() {
+            var client = Stomp.client('ws://localhost:15674/ws');
+
+            client.connect('guest', 'guest', function(frame) {
+                client.subscribe('/queue/car_numbers', function(message) {
+                    var num_cars = JSON.parse(message.body).num_cars;
+                    var timestamp = new Date().toLocaleString();
+
+                    var row = document.createElement('tr');
+                    row.innerHTML = '<td>' + timestamp + '</td><td>' + num_cars + '</td>';
+
+                    document.getElementById('messages').appendChild(row);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

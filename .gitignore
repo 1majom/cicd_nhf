@@ -1,3 +1,6 @@
-web/env/
-web/processed_images/
-web/uploads/
+env/
+processed_images/
+uploads/
+creds.sh
+Jenkinsfile
+__pycache__/creds.cpython-311.pyc

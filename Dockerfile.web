@@ -1,0 +1,19 @@
+FROM python:3.8-slim-buster
+
+WORKDIR /
+
+COPY app_web.py /
+COPY requirements.txt /
+COPY templates /templates
+
+RUN apt-get update && apt-get install -y \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgl1-mesa-dev \
+    libglib2.0-0
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5000
+
+CMD ["sh", "-c", "sleep 30 && python app_web.py"]

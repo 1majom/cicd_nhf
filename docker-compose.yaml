@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  rabbitmq:
+    build: 
+      context: .
+      dockerfile: Dockerfile.rabbit
+    ports:
+      - "5672:5672"  # RabbitMQ default port for AMQP
+      - "15672:15672"  # RabbitMQ management UI port
+      - "61613:61613"  # RabbitMQ STOMP port
+      - "15674:15674"  # RabbitMQ STOMP over WebSockets port
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"  # Default username
+      RABBITMQ_DEFAULT_PASS: "guest"  # Default password
+    volumes:
+      - "rabbitmq_data:/var/lib/rabbitmq"  # Persist data
+
+  mariadb:
+    image: "mariadb:latest"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root_password"
+      MYSQL_DATABASE: "database"
+      MYSQL_USER: "username"
+      MYSQL_PASSWORD: "password"
+    ports:
+      - "3306:3306"  # MariaDB default port
+
+  # test:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.web
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     - ENDPOINT=${ENDPOINT}
+  #     - KEY=${KEY}
+  #   volumes:
+  #     - "uploads_volume:/uploads"
+  #     - "processed_images_volume:/processed_images"
+  #   container_name: test
+  #   depends_on:
+  #     - rabbitmq
+  #     - mariadb
+
+volumes:
+  rabbitmq_data:
+  uploads_volume:
+  processed_images_volume:
