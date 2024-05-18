@@ -1,8 +1,8 @@
 """
 This module has the main application basically. It has three connections to other components
-One to the rabbitMQ for notifying the admins on the /admin endpoint. And antoher to the Azure
-Compute Vision which makes the car detection and by this it gives back the loctions of the cars
-from which we can draw the rectangles and get the number of cars. the last connection is to the
+One to the rabbitMQ for notifying the admins on the /admin endpoint. And another to the Azure
+Compute Vision which makes the car detection and by this it gives back the locations of the cars
+from which we can draw the rectangles and get the number of cars. The last connection is to the
 mariadb which is used to store the number of the cars and also the path on which the images can be reached.
 """
 
@@ -35,6 +35,9 @@ class Upload(db.Model):
     original_image_path = db.Column(db.String(255), nullable=False)
     modified_image_path = db.Column(db.String(255), nullable=False)
     text = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return f'<Upload {self.id}>'
 
 UPLOADS_FOLDER = 'uploads'
 if not os.path.exists(UPLOADS_FOLDER):
@@ -82,14 +85,14 @@ def detect_cars(image_path):
         analysis = client.analyze_image_in_stream(image_file, [VisualFeatureTypes.objects])
 
     cars = [obj for obj in analysis.objects if obj.object_property == 'car']
-    image = cv2.imread(image_path)
+    image = cv2.imread(image_path)  # pylint: disable=no-member
 
     for car in cars:
         rect = car.rectangle
-        cv2.rectangle(image, (rect.x, rect.y), (rect.x + rect.w, rect.y + rect.h), (0, 255, 0), 5)
+        cv2.rectangle(image, (rect.x, rect.y), (rect.x + rect.w, rect.y + rect.h), (0, 255, 0), 5)  # pylint: disable=no-member
 
     annotated_image_path = os.path.splitext(image_path)[0] + '_annotated.jpg'
-    cv2.imwrite(annotated_image_path, image)
+    cv2.imwrite(annotated_image_path, image)  # pylint: disable=no-member
 
     return len(cars), annotated_image_path
 
@@ -104,7 +107,7 @@ def send_to_rabbitmq(num_cars, text):
     channel.basic_publish(exchange='',
                           routing_key='car_numbers',
                           body=json.dumps({'num_cars': num_cars, 'text': text}))
-    
+
     print(" [x] Sent 'num_cars'")
     connection.close()
 
