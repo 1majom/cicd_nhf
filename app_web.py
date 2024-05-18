@@ -1,16 +1,20 @@
+"""
+This module has the main application basically. It has three connections to other components
+One to the rabbitMQ for notifying the admins on the /admin endpoint. And antoher to the Azure
+Compute Vision which makes the car detection and by this it gives back the loctions of the cars
+from which we can draw the rectangles and get the number of cars. the last connection is to the
+mariadb which is used to store the number of the cars and also the path on which the images can be reached.
+"""
+
+import os
+import json
+import cv2
+import pika
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
-import os
-import cv2
-import requests
-import stomp
-import json
-import pika
-import os
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@mariadb/database'
@@ -23,6 +27,9 @@ RABBITMQ_PORT = 15674  # Web STOMP port
 QUEUE_NAME = '/queue/car_numbers'
 
 class Upload(db.Model):
+    """
+    This class model which represents an image with the two versions.
+    """
     id = db.Column(db.Integer, primary_key=True)
     num_cars = db.Column(db.Integer, nullable=False)
     original_image_path = db.Column(db.String(255), nullable=False)
@@ -36,22 +43,37 @@ PROCESSED_IMAGES_FOLDER = 'processed_images'
 
 @app.route('/uploads/<path:filename>')
 def serve_upload(filename):
+    """
+    This function serves the uploaded files
+    """
     return send_from_directory(UPLOADS_FOLDER, filename)
 
 @app.route('/processed_images/<path:filename>')
 def serve_processed_image(filename):
+    """
+    This function serves the processed images.
+    """
     return send_from_directory(PROCESSED_IMAGES_FOLDER, filename)
 
 @app.route('/')
 def index():
+    """
+    This function renders the index page.
+    """
     uploads = Upload.query.all()
     return render_template('index.html', uploads=uploads)
 
 @app.route('/admin')
 def admin():
+    """
+    This function renders the admin page.
+    """
     return render_template('admin.html')
 
 def detect_cars(image_path):
+    """
+    This function detects cars in the given image by using Azure
+    """
     key = os.environ.get('KEY')
     endpoint = os.environ.get('ENDPOINT')
     client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(key))
@@ -71,19 +93,26 @@ def detect_cars(image_path):
 
     return len(cars), annotated_image_path
 
-def send_to_rabbitmq(num_cars):
+def send_to_rabbitmq(num_cars, text):
+    """
+    This function sends the number of cars to RabbitMQ.
+    """
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
     channel = connection.channel()
     channel.queue_declare(queue='car_numbers', durable=True)
 
     channel.basic_publish(exchange='',
                           routing_key='car_numbers',
-                          body=json.dumps({'num_cars': num_cars}))
+                          body=json.dumps({'num_cars': num_cars, 'text': text}))
+    
     print(" [x] Sent 'num_cars'")
     connection.close()
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    """
+    This function handles the upload of images.
+    """
     if request.method == 'POST':
         image = request.files['image']
         text = request.form['text']
@@ -94,7 +123,7 @@ def upload():
 
             num_cars, annotated_image_path = detect_cars(image_path)
 
-            send_to_rabbitmq(num_cars)  # Send number of cars to RabbitMQ
+            send_to_rabbitmq(num_cars, text)  # Send number of cars to RabbitMQ
 
             new_upload = Upload(num_cars=num_cars, original_image_path=image_path,
                                 modified_image_path=annotated_image_path, text=text)
