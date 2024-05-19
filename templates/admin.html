@@ -22,6 +22,7 @@
             var client = Stomp.client('ws://localhost:15674/ws');
 
             client.connect('guest', 'guest', function(frame) {
+                startButton.disabled = true;
                 client.subscribe('/queue/car_numbers', function(message) {
                     var num_cars = JSON.parse(message.body).num_cars;
                     var text = JSON.parse(message.body).text;
